@@ -1,0 +1,358 @@
+def func(n, arr):
+    if n == 0 or n == 1:
+        arr[n] = n
+        return n
+
+    x = func(n - 1, arr) + func(n - 2, arr)
+    arr[n] = x
+    return x
+
+n = int(input("Enter the number of terms: "))
+arr = [None] * (n + 1)
+
+print("The Fibonacci number series using recursion is:")
+x = func(n, arr)
+for i in range(n):
+    print(arr[i], end=" ")
+print()
+
+print("The Fibonacci number series using non-recursive method is:")
+if n == 0:
+    print(0)
+elif n == 1:
+    print(1)
+else:
+    prev1 = 0
+    prev2 = 1
+    print(prev1, prev2, end=" ")
+
+    for i in range(2, n):
+        x = prev1 + prev2
+        print(x, end=" ")
+        prev1, prev2 = prev2, x
+
+print()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import heapq
+from collections import defaultdict, Counter
+
+# Node class to represent the Huffman tree nodes
+class Node:
+    def __init__(self, char, freq):
+        self.char = char
+        self.freq = freq
+        self.left = None
+        self.right = None
+
+    def __lt__(self, other):
+        return self.freq < other.freq
+
+# Function to build the Huffman tree
+def build_huffman_tree(data):
+    frequency = Counter(data)
+    min_heap = [Node(char, freq) for char, freq in frequency.items()]
+    heapq.heapify(min_heap)
+
+    while len(min_heap) > 1:
+        left = heapq.heappop(min_heap)
+        right = heapq.heappop(min_heap)
+        combined_node = Node(None, left.freq + right.freq)
+        combined_node.left = left
+        combined_node.right = right
+        heapq.heappush(min_heap, combined_node)
+
+    return min_heap[0]
+
+# Function to generate Huffman codes
+def generate_huffman_codes(root, code, huffman_codes):
+    if root is None:
+        return
+
+    if root.char is not None:
+        huffman_codes[root.char] = code
+    generate_huffman_codes(root.left, code + "0", huffman_codes)
+    generate_huffman_codes(root.right, code + "1", huffman_codes)
+
+# Function to encode a message using Huffman codes
+def huffman_encode(message):
+    root = build_huffman_tree(message)
+    huffman_codes = {}
+    generate_huffman_codes(root, "", huffman_codes)
+    encoded_message = ''.join(huffman_codes[char] for char in message)
+    return encoded_message, huffman_codes
+
+# Function to decode a message using Huffman codes
+def huffman_decode(encoded_message, huffman_codes):
+    reverse_huffman_codes = {code: char for char, code in huffman_codes.items()}
+    decoded_message = ''
+    code = ''
+    for bit in encoded_message:
+        code += bit
+        if code in reverse_huffman_codes:
+            decoded_message += reverse_huffman_codes[code]
+            code = ''
+    return decoded_message
+
+if __name__ == "__main__":
+    message = "this is an example for huffman encoding"
+    encoded_message, huffman_codes = huffman_encode(message)
+    decoded_message = huffman_decode(encoded_message, huffman_codes)
+
+    print("Original Message:", message)
+    print("Encoded Message:", encoded_message)
+    print("Decoded Message:", decoded_message)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def fractional_knapsack(items, capacity):
+    # Calculate value-to-weight ratio for each item
+    for item in items:
+        item.append(item[0] / item[1])
+
+    # Sort items by value-to-weight ratio in descending order
+    items.sort(key=lambda x: x[2], reverse=True)
+
+    total_value = 0.0
+    remaining_capacity = capacity
+
+    for item in items:
+        if remaining_capacity >= item[1]:
+            total_value += item[0]
+            remaining_capacity -= item[1]
+        else:
+            fraction = remaining_capacity / item[1]
+            total_value += item[0] * fraction
+            break
+
+    return total_value
+
+if __name__ == "__main__":
+    n = int(input("Enter the number of items: "))
+    items = []
+
+    for i in range(n):
+        value, weight = map(int, input(f"Enter value and weight for item {i + 1}: ").split())
+        items.append([value, weight])
+
+    capacity = float(input("Enter the capacity of the knapsack: "))
+
+    max_value = fractional_knapsack(items, capacity)
+    print(f"The maximum value in the knapsack is: {max_value:.2f}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def knapsack_01(values, weights, capacity):
+    n = len(values)
+    dp = [[0] * (capacity + 1) for _ in range(n + 1)]
+
+    for i in range(n + 1):
+        for w in range(capacity + 1):
+            if i == 0 or w == 0:
+                dp[i][w] = 0
+            elif weights[i - 1] <= w:
+                dp[i][w] = max(values[i - 1] + dp[i - 1][w - weights[i - 1]], dp[i - 1][w])
+            else:
+                dp[i][w] = dp[i - 1][w]
+
+    max_value = dp[n][capacity]
+    return max_value
+
+if __name__ == "__main__":
+    values = [60, 100, 120]  # Values of items
+    weights = [10, 20, 30]  # Weights of items
+    capacity = 50  # Capacity of the knapsack
+
+    max_value = knapsack_01(values, weights, capacity)
+    print(f"The maximum value in the knapsack is: {max_value}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def is_safe(board, row, col, n):
+    # Check if a Queen can be placed at board[row][col] without attacking other Queens
+    # Check the left side of the current row
+    for i in range(col):
+        if board[row][i] == 1:
+            return False
+
+    # Check upper diagonal on the left side
+    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
+        if board[i][j] == 1:
+            return False
+
+    # Check lower diagonal on the left side
+    for i, j in zip(range(row, n, 1), range(col, -1, -1)):
+        if board[i][j] == 1:
+            return False
+
+    return True
+
+def solve_n_queens(n):
+    board = [[0 for _ in range(n)] for _ in range(n)]
+    
+    if not solve_n_queens_util(board, 0, n):
+        print("No solution exists.")
+        return
+    
+    print_board(board)
+
+def solve_n_queens_util(board, col, n):
+    if col >= n:
+        return True
+
+    for i in range(n):
+        if is_safe(board, i, col, n):
+            board[i][col] = 1
+
+            if solve_n_queens_util(board, col + 1, n):
+                return True
+
+            board[i][col] = 0
+
+    return False
+
+def print_board(board):
+    n = len(board)
+    for i in range(n):
+        for j in range(n):
+            print("Q" if board[i][j] == 1 else ".", end=" ")
+        print()
+
+if __name__ == "__main__":
+    n = int(input("Enter the size of the N-Queens board: "))
+    solve_n_queens(n)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def quick_sort(arr):
+    if len(arr) <= 1:
+        return arr
+
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+
+    return quick_sort(left) + middle + quick_sort(right)
+
+if __name__ == "__main__":
+    input_str = input("Enter a list of numbers separated by spaces: ")
+    input_list = [int(x) for x in input_str.split()]
+    
+    sorted_arr = quick_sort(input_list)
+    
+    print("Original array:", input_list)
+    print("Sorted array:", sorted_arr)
